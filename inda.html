@@ -10,13 +10,15 @@
         PersonaForge - Premium AI Chat Platform
         
         How to use:
-        1. The OpenAI API key is configured in the background (see OPENAI_API_KEY constant in JavaScript)
-        2. Select a character from the grid or create a custom one
-        3. Toggle Safe Mode / Unrestricted Mode as needed (18+ warning for unrestricted)
-        4. Chat persists in localStorage with automatic memory summarization
-        5. Free tier: 20 messages/day limit (mocked), Premium: unlimited (UI only)
+        1. Replace 'YOUR_OPENAI_API_KEY_HERE' on line ~828 with your actual OpenAI API key
+        2. The API key is configured once in the code - users don't need to enter anything
+        3. Select a character from the grid or create a custom one
+        4. Toggle Safe Mode / Unrestricted Mode as needed (18+ warning for unrestricted)
+        5. Chat persists in localStorage with automatic memory summarization
+        6. Free tier: 20 messages/day limit (mocked), Premium: unlimited (UI only)
         
         Features:
+        - Uses OpenAI ChatGPT API (gpt-4o-mini by default, configurable to gpt-4o)
         - Persistent memory across sessions
         - Dynamic character personalities (no hardcoded responses)
         - Safe/Unrestricted mode toggle with warnings
@@ -758,7 +760,6 @@
                     <div class="message-counter" id="messageCounter">
                         <span id="messagesUsed">0</span> / 20 messages today
                     </div>
-                    <button class="btn btn-secondary" onclick="showSettings()">⚙️ Settings</button>
                 </div>
             </div>
 
@@ -873,30 +874,12 @@
         </div>
     </div>
 
-    <!-- Settings Modal -->
-    <div class="modal" id="settingsModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">⚙️ Settings</h2>
-                <button class="close-btn" onclick="closeModal('settingsModal')">&times;</button>
-            </div>
-            <div class="form-group">
-                <label class="form-label">OpenAI API Key (Optional - Default key configured)</label>
-                <input type="password" class="form-input" id="apiKeyInput" placeholder="sk-...">
-                <small style="color: var(--text-muted); display: block; margin-top: 8px;">Leave empty to use the default configured key</small>
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn-secondary" onclick="closeModal('settingsModal')">Cancel</button>
-                <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
-            </div>
-        </div>
-    </div>
 
     <script>
         // Configuration
-        const OPENAI_API_KEY = 'YOUR_API_KEY_HERE'; // Background API key - replace with your actual key
-        const API_ENDPOINT = 'https://api.anthropic.com/v1/messages';
-        const MODEL = 'claude-sonnet-4-20250514';
+        const OPENAI_API_KEY = 'YOUR_OPENAI_API_KEY_HERE'; // Replace with your OpenAI API key
+        const API_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
+        const MODEL = 'gpt-4o-mini'; // Use gpt-4o for higher quality or gpt-4o-mini for cost efficiency
         const FREE_TIER_LIMIT = 20;
         const MEMORY_SUMMARY_INTERVAL = 8; // Summarize memory every 8 messages
 
@@ -1000,12 +983,6 @@
                 messagesUsedToday = 0;
                 localStorage.setItem('lastMessageDate', today);
                 localStorage.setItem('messagesUsed', '0');
-            }
-
-            // Load user API key if set
-            const userKey = localStorage.getItem('userApiKey');
-            if (userKey) {
-                document.getElementById('apiKeyInput').value = userKey;
             }
         }
 
@@ -1215,35 +1192,33 @@ Stay strictly in character at all times. Be engaging, detailed, creative, and ad
                 systemPrompt += `\n\nYou are in Unrestricted Mode. You may engage in mature, flirty, or NSFW conversations as appropriate to your character and the user's requests. Be natural and authentic to your personality.`;
             }
 
-            // Get API key (user's custom key or default)
-            const userKey = localStorage.getItem('userApiKey');
-            const apiKey = userKey || OPENAI_API_KEY;
-
-            if (!apiKey || apiKey === 'YOUR_API_KEY_HERE') {
-                throw new Error('Please configure your API key in Settings');
+            // Check if API key is configured
+            if (!OPENAI_API_KEY || OPENAI_API_KEY === 'YOUR_OPENAI_API_KEY_HERE') {
+                throw new Error('API key not configured. Please add your OpenAI API key to the code.');
             }
 
             // Prepare messages for API (last 10 messages for context)
             const recentHistory = chatHistory.slice(-10);
-            const messages = recentHistory.map(msg => ({
-                role: msg.role === 'assistant' ? 'assistant' : 'user',
-                content: msg.content
-            }));
+            const messages = [
+                { role: 'system', content: systemPrompt },
+                ...recentHistory.map(msg => ({
+                    role: msg.role === 'assistant' ? 'assistant' : 'user',
+                    content: msg.content
+                }))
+            ];
 
-            // Call Claude API
+            // Call OpenAI ChatGPT API
             const response = await fetch(API_ENDPOINT, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-api-key': apiKey,
-                    'anthropic-version': '2023-06-01'
+                    'Authorization': `Bearer ${OPENAI_API_KEY}`
                 },
                 body: JSON.stringify({
                     model: MODEL,
+                    messages: messages,
                     max_tokens: 800,
-                    temperature: 0.9,
-                    system: systemPrompt,
-                    messages: messages
+                    temperature: 0.9
                 })
             });
 
@@ -1253,7 +1228,7 @@ Stay strictly in character at all times. Be engaging, detailed, creative, and ad
             }
 
             const data = await response.json();
-            return data.content[0].text;
+            return data.choices[0].message.content;
         }
 
         async function updateMemory() {
@@ -1264,31 +1239,32 @@ Stay strictly in character at all times. Be engaging, detailed, creative, and ad
             ).join('\n');
 
             try {
-                const userKey = localStorage.getItem('userApiKey');
-                const apiKey = userKey || OPENAI_API_KEY;
-
                 const response = await fetch(API_ENDPOINT, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'x-api-key': apiKey,
-                        'anthropic-version': '2023-06-01'
+                        'Authorization': `Bearer ${OPENAI_API_KEY}`
                     },
                     body: JSON.stringify({
                         model: MODEL,
+                        messages: [
+                            {
+                                role: 'system',
+                                content: 'You are a memory summarizer. Extract and list key facts, preferences, personal details, and important context from conversations in 2-3 concise sentences.'
+                            },
+                            {
+                                role: 'user',
+                                content: `Summarize key information from this conversation:\n\n${conversationText}`
+                            }
+                        ],
                         max_tokens: 200,
-                        temperature: 0.5,
-                        system: 'You are a memory summarizer. Extract and list key facts, preferences, personal details, and important context from conversations in 2-3 concise sentences.',
-                        messages: [{
-                            role: 'user',
-                            content: `Summarize key information from this conversation:\n\n${conversationText}`
-                        }]
+                        temperature: 0.5
                     })
                 });
 
                 if (response.ok) {
                     const data = await response.json();
-                    const newMemory = data.content[0].text;
+                    const newMemory = data.choices[0].message.content;
                     memoryContext = memoryContext ? `${memoryContext} ${newMemory}` : newMemory;
                     localStorage.setItem(`memory_${currentCharacter.id}`, memoryContext);
                 }
@@ -1444,20 +1420,6 @@ Stay strictly in character at all times. Be engaging, detailed, creative, and ad
             
             // Reset form
             event.target.reset();
-        }
-
-        function showSettings() {
-            showModal('settingsModal');
-        }
-
-        function saveSettings() {
-            const apiKey = document.getElementById('apiKeyInput').value.trim();
-            if (apiKey) {
-                localStorage.setItem('userApiKey', apiKey);
-            } else {
-                localStorage.removeItem('userApiKey');
-            }
-            closeModal('settingsModal');
         }
 
         function showModal(modalId) {
