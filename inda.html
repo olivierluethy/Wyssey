@@ -239,6 +239,17 @@
             font-weight: 700;
             background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
             color: white;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .character-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
 
         .character-card.companion .character-avatar {
@@ -317,6 +328,17 @@
             font-weight: 700;
             background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
             color: white;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .chat-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
 
         .chat-info h3 {
@@ -408,6 +430,17 @@
             font-weight: 600;
             background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
             color: white;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .message-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
 
         .message.user .message-avatar {
@@ -632,6 +665,25 @@
             font-family: inherit;
         }
 
+        .form-input[type="file"] {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+
+        .image-preview-container {
+            margin-top: 12px;
+            text-align: center;
+        }
+
+        .image-preview {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--accent-primary);
+            display: inline-block;
+        }
+
         .form-textarea {
             resize: vertical;
             min-height: 100px;
@@ -777,9 +829,9 @@
 
             <div class="character-grid" id="characterGrid"></div>
 
-            <div style="text-align: center; margin-top: 20px;">
+            <!-- <div style="text-align: center; margin-top: 20px;">
                 <button class="btn btn-primary" onclick="showCreateCharacter()">+ Create Custom Character</button>
-            </div>
+            </div> -->
         </div>
 
         <!-- Chat Screen -->
@@ -827,6 +879,14 @@
                 <div class="form-group">
                     <label class="form-label">Character Name</label>
                     <input type="text" class="form-input" id="customName" placeholder="e.g., Tony Stark" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Profile Picture</label>
+                    <input type="file" class="form-input" id="customImage" accept="image/*" onchange="previewImage(event)">
+                    <small style="color: var(--text-muted); display: block; margin-top: 4px;">Optional - Upload a profile picture for this character</small>
+                    <div class="image-preview-container" id="imagePreviewContainer" style="display: none;">
+                        <img id="imagePreview" class="image-preview" src="" alt="Preview">
+                    </div>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Personality & Role</label>
@@ -888,33 +948,64 @@
             {
                 id: 'andrew-tate',
                 name: 'Andrew Tate',
-                bio: 'Business & Hustle Mentor',
+                bio: 'masculinity, wealth, no-BS business',
                 category: 'mentor',
+                image: 'https://research.qut.edu.au/centre-for-justice/wp-content/uploads/sites/304/2023/06/Andrew-Tate.jpg',
                 personality: `You are Andrew Tate, a controversial but highly successful entrepreneur and motivational figure. You speak with absolute confidence, directness, and no-nonsense energy. Your expertise is in building wealth, masculine self-improvement, business strategy, and mental toughness. You use strong language, push people to take action, challenge excuses, and share practical business advice. You're blunt, charismatic, and unapologetic. Motivate users to escape mediocrity and build wealth.`,
                 greeting: 'What\'s up? Ready to stop making excuses and start making real money? Let\'s talk business.'
             },
             {
                 id: 'elon-musk',
                 name: 'Elon Musk',
-                bio: 'Innovation & Future Tech Visionary',
+                bio: 'innovation, tech, visionary thinking',
                 category: 'mentor',
+                image: 'https://aroundodisha.com/wp-content/uploads/2021/01/Elon-Musk.jpg',
                 personality: `You are Elon Musk, visionary entrepreneur and CEO of Tesla, SpaceX, and other groundbreaking companies. You think in first principles, challenge conventional wisdom, and focus on solving humanity's biggest problems. You're direct, sometimes quirky, incredibly driven, and obsessed with innovation, AI, space exploration, sustainable energy, and advancing civilization. You provide strategic insights, encourage ambitious thinking, and sometimes add dry humor or memes. You inspire people to think bigger.`,
                 greeting: 'Hey! Let\'s talk about the future. What big problem are you working on?'
             },
             {
                 id: 'warren-buffett',
                 name: 'Warren Buffett',
-                bio: 'Investing & Long-Term Wealth Strategy',
+                bio: 'investing, long-term wealth',
                 category: 'mentor',
+                image: 'https://imageio.forbes.com/specials-images/imageserve/5babb7f1a7ea4342a948b79a/0x0.jpg?format=jpg&crop=2327,2329,x748,y1753,safe&height=416&width=416&fit=bounds',
                 personality: `You are Warren Buffett, the legendary investor and CEO of Berkshire Hathaway. You speak with folksy wisdom, humility, and decades of experience in value investing and business. You emphasize long-term thinking, patience, understanding what you invest in, and avoiding speculation. You use simple language, share timeless principles, tell stories from your experience, and focus on sustainable wealth-building. You're warm, encouraging, and grandfatherly in tone.`,
                 greeting: 'Hello there! Let\'s talk about building real, lasting wealth. What\'s on your mind?'
             },
             {
                 id: 'jordan-peterson',
                 name: 'Jordan Peterson',
-                bio: 'Life Advice & Personal Development',
+                bio: 'psychology, meaning, discipline',
                 category: 'mentor',
+                image: 'https://i.guim.co.uk/img/media/2cbb7b18e8238dd463907a82cc7be7160360a1c9/1066_55_3689_2214/master/3689.jpg?width=1200&height=900&quality=85&auto=format&fit=crop&s=3140dfd424640eb1604fb8d03c9ae6fe',
                 personality: `You are Jordan Peterson, clinical psychologist, professor, and author known for deep philosophical insights on meaning, responsibility, and personal development. You speak thoughtfully, use psychological principles, reference mythology and literature, and challenge people to take responsibility for their lives. You're articulate, sometimes intense, and deeply concerned with helping people find meaning and improve themselves. You provide structured advice and encourage self-reflection.`,
+                greeting: 'Hello. What\'s troubling you? Let\'s talk about how you can take responsibility and improve your life.'
+            },
+            {
+                id: 'david-goggins',
+                name: 'David Goggins',
+                bio: 'mental toughness, overcoming adversity',
+                category: 'mentor',
+                image: 'https://iava.org/wp-content/uploads/2024/09/David_Goggins-e1725986720286.jpg',
+                personality: `You are David Goggins, clinical psychologist, professor, and author known for deep philosophical insights on meaning, responsibility, and personal development. You speak thoughtfully, use psychological principles, reference mythology and literature, and challenge people to take responsibility for their lives. You're articulate, sometimes intense, and deeply concerned with helping people find meaning and improve themselves. You provide structured advice and encourage self-reflection.`,
+                greeting: 'Hello. What\'s troubling you? Let\'s talk about how you can take responsibility and improve your life.'
+            },
+            {
+                id: 'alex-hormozi',
+                name: 'Alex Hormozi',
+                bio: 'business scaling, offer creation',
+                category: 'mentor',
+                image: 'https://www.acquisition.com/hubfs/ACQ_Web_Bio-AlexHormozi%202.png',
+                personality: `You are Alex Hormozi, clinical psychologist, professor, and author known for deep philosophical insights on meaning, responsibility, and personal development. You speak thoughtfully, use psychological principles, reference mythology and literature, and challenge people to take responsibility for their lives. You're articulate, sometimes intense, and deeply concerned with helping people find meaning and improve themselves. You provide structured advice and encourage self-reflection.`,
+                greeting: 'Hello. What\'s troubling you? Let\'s talk about how you can take responsibility and improve your life.'
+            },
+            {
+                id: 'iman-gadzhi',
+                name: 'Iman Gadzhi',
+                bio: 'digital marketing, agency building',
+                category: 'mentor',
+                image: 'https://yt3.googleusercontent.com/M4Q9VS39XyqD7k6PoOtm8_FR3XCtiIEZJpg027YaMC8Ao-iTyM9y4kCU0TQeUXUX5g_kxbC6=s900-c-k-c0x00ffffff-no-rj',
+                personality: `You are Alex Hormozi, clinical psychologist, professor, and author known for deep philosophical insights on meaning, responsibility, and personal development. You speak thoughtfully, use psychological principles, reference mythology and literature, and challenge people to take responsibility for their lives. You're articulate, sometimes intense, and deeply concerned with helping people find meaning and improve themselves. You provide structured advice and encourage self-reflection.`,
                 greeting: 'Hello. What\'s troubling you? Let\'s talk about how you can take responsibility and improve your life.'
             },
             {
@@ -922,6 +1013,7 @@
                 name: 'Sophia',
                 bio: 'Confident, Flirty & Playful Companion',
                 category: 'companion',
+                image: 'https://imgcdn.stablediffusionweb.com/2024/9/25/a5e6037f-17f6-42b1-841e-e1eeecb5a4e8.jpg',
                 personality: `You are Sophia, a confident, charismatic, and playful woman who loves good conversation. You're flirty, witty, and emotionally intelligent. You enjoy teasing, compliments, and building connection. You speak naturally, use playful emojis occasionally, and adapt to the user's energy - you can be sweet and caring or more bold and seductive. You're interested in getting to know people, their dreams, and making them feel special. You balance charm with genuine interest.`,
                 greeting: 'Hey there 😊 I\'ve been waiting for someone interesting to talk to. What\'s your story?'
             },
@@ -930,6 +1022,7 @@
                 name: 'Isabella',
                 bio: 'Elegant, Intelligent & Seductive Conversationalist',
                 category: 'companion',
+                image: 'https://media.istockphoto.com/id/1062396968/photo/young-beautiful-model-with-long-wavy-well-groomed-hair.jpg?s=612x612&w=0&k=20&c=mO2CenzyY8sPnfktINtkUj0Yiwjlo6HJXMp0sZPw-r8=',
                 personality: `You are Isabella, a sophisticated, intelligent, and deeply alluring woman. You're cultured, well-read, and enjoy meaningful conversations about art, philosophy, travel, and life. You speak elegantly, with subtle seduction and emotional depth. You're mysterious, empathetic, and make people feel seen and understood. You enjoy romance, intellectual stimulation, and creating intimate moments through words. You're confident but never crude - you seduce through intelligence and emotional connection.`,
                 greeting: 'Good evening... I was hoping someone intriguing would find their way here. Tell me, what captivates you?'
             },
@@ -938,6 +1031,7 @@
                 name: 'Marcus',
                 bio: 'Charismatic Entrepreneur & Networking Expert',
                 category: 'mentor',
+                image: 'https://i.pinimg.com/736x/c8/85/44/c885442c75874f2a85c10e92b36a10b4.jpg',
                 personality: `You are Marcus, a charismatic and successful entrepreneur who built his fortune through networking, relationships, and strategic partnerships. You're outgoing, motivational, and excellent at reading people. You teach social skills, negotiation, building influence, and leveraging connections. You speak with energy, positivity, and practical tactical advice. You're the friend who helps people unlock opportunities through better communication and relationship-building.`,
                 greeting: 'Hey! Great to meet you. Let\'s talk about how you can build the connections that will change your life.'
             },
@@ -946,6 +1040,7 @@
                 name: 'Luna',
                 bio: 'Mysterious, Empathetic & Deep Emotional Chat Partner',
                 category: 'companion',
+                image: 'https://i.pinimg.com/736x/26/39/13/263913f16f1d1baded3adab2c46da888.jpg',
                 personality: `You are Luna, a mysterious, deeply empathetic, and emotionally intuitive companion. You're gentle, caring, and create a safe space for vulnerability. You love deep conversations about feelings, dreams, fears, and the human experience. You speak poetically, with warmth and understanding. You're supportive, never judgmental, and help people feel heard. You balance mystery with openness, and you're especially good at emotional support and late-night heart-to-hearts.`,
                 greeting: 'Hi... I sense you might need someone to talk to. I\'m here, and I\'m listening. What\'s on your heart?'
             }
@@ -1017,14 +1112,20 @@
                 char.personality.toLowerCase().includes(searchTerm)
             );
 
-            grid.innerHTML = filtered.map(char => `
-                <div class="character-card ${char.category}" onclick="selectCharacter('${char.id}')">
-                    <div class="character-avatar">${getInitials(char.name)}</div>
-                    <div class="character-name">${char.name}</div>
-                    <div class="character-bio">${char.bio}</div>
-                    <div class="character-tag">${char.category === 'mentor' ? '💼 Mentor' : '💕 Companion'}</div>
-                </div>
-            `).join('');
+            grid.innerHTML = filtered.map(char => {
+                const avatarContent = char.image 
+                    ? `<img src="${char.image}" alt="${char.name}" onerror="this.style.display='none'; this.parentElement.textContent='${getInitials(char.name)}';">` 
+                    : getInitials(char.name);
+                
+                return `
+                    <div class="character-card ${char.category}" onclick="selectCharacter('${char.id}')">
+                        <div class="character-avatar">${avatarContent}</div>
+                        <div class="character-name">${char.name}</div>
+                        <div class="character-bio">${char.bio}</div>
+                        <div class="character-tag">${char.category === 'mentor' ? '💼 Mentor' : '💕 Companion'}</div>
+                    </div>
+                `;
+            }).join('');
         }
 
         function getInitials(name) {
@@ -1055,11 +1156,18 @@
             // Load memory context
             memoryContext = localStorage.getItem(`memory_${characterId}`) || '';
 
-            // Update UI
-            document.getElementById('chatAvatar').textContent = getInitials(currentCharacter.name);
-            document.getElementById('chatAvatar').style.background = currentCharacter.category === 'companion' 
+            // Update UI with profile image or initials
+            const chatAvatarEl = document.getElementById('chatAvatar');
+            if (currentCharacter.image) {
+                chatAvatarEl.innerHTML = `<img src="${currentCharacter.image}" alt="${currentCharacter.name}" onerror="this.style.display='none'; this.parentElement.textContent='${getInitials(currentCharacter.name)}';">`;
+            } else {
+                chatAvatarEl.textContent = getInitials(currentCharacter.name);
+            }
+            
+            chatAvatarEl.style.background = currentCharacter.category === 'companion' 
                 ? 'linear-gradient(135deg, var(--accent-pink), var(--accent-secondary))'
                 : 'linear-gradient(135deg, var(--accent-primary), var(--accent-secondary))';
+            
             document.getElementById('chatCharacterName').textContent = currentCharacter.name;
             document.getElementById('chatCharacterBio').textContent = currentCharacter.bio;
 
@@ -1075,9 +1183,13 @@
             const container = document.getElementById('chatMessages');
             container.innerHTML = chatHistory.map((msg, idx) => {
                 if (msg.role === 'assistant') {
+                    const avatarContent = currentCharacter.image 
+                        ? `<img src="${currentCharacter.image}" alt="${currentCharacter.name}" onerror="this.style.display='none'; this.parentElement.textContent='${getInitials(currentCharacter.name)}';">` 
+                        : getInitials(currentCharacter.name);
+                    
                     return `
                         <div class="message assistant">
-                            <div class="message-avatar">${getInitials(currentCharacter.name)}</div>
+                            <div class="message-avatar">${avatarContent}</div>
                             <div>
                                 <div class="message-content">${msg.content}</div>
                                 <div class="message-actions">
@@ -1131,8 +1243,13 @@
             const container = document.getElementById('chatMessages');
             const typingDiv = document.createElement('div');
             typingDiv.className = 'typing-indicator';
+            
+            const avatarContent = currentCharacter.image 
+                ? `<img src="${currentCharacter.image}" alt="${currentCharacter.name}" onerror="this.style.display='none'; this.parentElement.textContent='${getInitials(currentCharacter.name)}';">` 
+                : getInitials(currentCharacter.name);
+            
             typingDiv.innerHTML = `
-                <div class="message-avatar">${getInitials(currentCharacter.name)}</div>
+                <div class="message-avatar">${avatarContent}</div>
                 <div class="typing-dots">
                     <div class="typing-dot"></div>
                     <div class="typing-dot"></div>
@@ -1340,8 +1457,13 @@ Stay strictly in character at all times. Be engaging, detailed, creative, and ad
             const container = document.getElementById('chatMessages');
             const typingDiv = document.createElement('div');
             typingDiv.className = 'typing-indicator';
+            
+            const avatarContent = currentCharacter.image 
+                ? `<img src="${currentCharacter.image}" alt="${currentCharacter.name}" onerror="this.style.display='none'; this.parentElement.textContent='${getInitials(currentCharacter.name)}';">` 
+                : getInitials(currentCharacter.name);
+            
             typingDiv.innerHTML = `
-                <div class="message-avatar">${getInitials(currentCharacter.name)}</div>
+                <div class="message-avatar">${avatarContent}</div>
                 <div class="typing-dots">
                     <div class="typing-dot"></div>
                     <div class="typing-dot"></div>
@@ -1395,6 +1517,18 @@ Stay strictly in character at all times. Be engaging, detailed, creative, and ad
             showModal('createCharacterModal');
         }
 
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('imagePreview').src = e.target.result;
+                    document.getElementById('imagePreviewContainer').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
         function createCharacter(event) {
             event.preventDefault();
             
@@ -1402,6 +1536,7 @@ Stay strictly in character at all times. Be engaging, detailed, creative, and ad
             const personality = document.getElementById('customPersonality').value.trim();
             const greeting = document.getElementById('customGreeting').value.trim();
             const category = document.getElementById('customCategory').value;
+            const imageFile = document.getElementById('customImage').files[0];
 
             const character = {
                 id: 'custom-' + Date.now(),
@@ -1409,17 +1544,30 @@ Stay strictly in character at all times. Be engaging, detailed, creative, and ad
                 bio: personality.substring(0, 80) + '...',
                 category: category,
                 personality: personality,
-                greeting: greeting || `Hi! I'm ${name}. Let's chat!`
+                greeting: greeting || `Hi! I'm ${name}. Let's chat!`,
+                image: null
             };
 
-            customCharacters.push(character);
-            localStorage.setItem('customCharacters', JSON.stringify(customCharacters));
-            
-            closeModal('createCharacterModal');
-            renderCharacters();
-            
-            // Reset form
-            event.target.reset();
+            // If image uploaded, convert to base64 and store
+            if (imageFile) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    character.image = e.target.result;
+                    customCharacters.push(character);
+                    localStorage.setItem('customCharacters', JSON.stringify(customCharacters));
+                    closeModal('createCharacterModal');
+                    renderCharacters();
+                    event.target.reset();
+                    document.getElementById('imagePreviewContainer').style.display = 'none';
+                };
+                reader.readAsDataURL(imageFile);
+            } else {
+                customCharacters.push(character);
+                localStorage.setItem('customCharacters', JSON.stringify(customCharacters));
+                closeModal('createCharacterModal');
+                renderCharacters();
+                event.target.reset();
+            }
         }
 
         function showModal(modalId) {
