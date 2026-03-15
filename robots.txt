@@ -1,0 +1,22 @@
+# robots.txt für Wyssey.ai / wyssey.app / deine Domain
+# Stand: März 2026
+
+User-agent: *
+Allow: /
+Disallow: /chat/                  # falls du mal echte Chat-URLs hast, die nicht indexiert werden sollen
+Disallow: /private/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /*?*                     # alle URLs mit Query-Parametern (z. B. Tracking-Links) ausklammern
+
+# Keine Indexierung von temporären oder sensiblen Pfaden
+Disallow: /*.json$
+Disallow: /*.txt$
+Disallow: /tmp/
+Disallow: /backup/
+
+# Sitemap explizit angeben
+Sitemap: https://wyssey.com/sitemap.xml
+
+# Crawl-Delay (optional – hilft kleinen Seiten manchmal)
+Crawl-delay: 10
