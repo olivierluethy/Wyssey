@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wyssey — Guidance From Legendary Minds</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'display': ['Instrument Serif', 'serif'],
+                        'body': ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        'wyssey': {
+                            'dark': '#0a0a0b',
+                            'darker': '#050506',
+                            'card': '#111113',
+                            'border': '#1f1f23',
+                            'muted': '#71717a',
+                            'accent': '#f97316',
+                            'accent-light': '#fb923c',
+                            'glow': 'rgba(249, 115, 22, 0.15)',
+                        }
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'float-delayed': 'float 6s ease-in-out 2s infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'gradient': 'gradient 8s ease infinite',
+                        'fade-up': 'fadeUp 0.8s ease-out forwards',
+                        'fade-up-delayed': 'fadeUp 0.8s ease-out 0.2s forwards',
+                        'scale-in': 'scaleIn 0.6s ease-out forwards',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        },
+                        gradient: {
+                            '0%, 100%': { backgroundPosition: '0% 50%' },
+                            '50%': { backgroundPosition: '100% 50%' },
+                        },
+                        fadeUp: {
+                            '0%': { opacity: '0', transform: 'translateY(30px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        scaleIn: {
+                            '0%': { opacity: '0', transform: 'scale(0.9)' },
+                            '100%': { opacity: '1', transform: 'scale(1)' },
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        body {
+            background: #050506;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #ffffff 0%, #f97316 50%, #fb923c 100%);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradient 8s ease infinite;
+        }
+        
+        .hero-glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(249, 115, 22, 0.12) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(80px);
+            pointer-events: none;
+        }
+        
+        .card-glow {
+            position: absolute;
+            inset: -1px;
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.3) 0%, transparent 50%, rgba(251, 146, 60, 0.1) 100%);
+            border-radius: inherit;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            z-index: -1;
+        }
+        
+        .mentor-card:hover .card-glow {
+            opacity: 1;
+        }
+        
+        .mentor-card {
+            position: relative;
+            background: linear-gradient(180deg, #111113 0%, #0d0d0f 100%);
+            border: 1px solid #1f1f23;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .mentor-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(249, 115, 22, 0.4);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(249, 115, 22, 0.1);
+        }
+        
+        .icon-wrapper {
+            transition: all 0.3s ease;
+        }
+        
+        .icon-wrapper:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+        
+        .noise-overlay {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            z-index: 9999;
+        }
+        
+        .btn-primary {
+            position: relative;
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .btn-primary:hover::before {
+            opacity: 1;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px -15px rgba(249, 115, 22, 0.5);
+        }
+        
+        .btn-primary span {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .grid-pattern {
+            background-image: 
+                linear-gradient(rgba(249, 115, 22, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(249, 115, 22, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(180deg, rgba(17, 17, 19, 0.8) 0%, rgba(10, 10, 11, 0.8) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid #1f1f23;
+        }
+        
+        .divider-gradient {
+            background: linear-gradient(90deg, transparent, rgba(249, 115, 22, 0.3), transparent);
+            height: 1px;
+        }
+        
+        .scroll-fade {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .scroll-fade.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .problem-icon {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .problem-icon:nth-child(2) {
+            animation-delay: 1s;
+        }
+        
+        .problem-icon:nth-child(3) {
+            animation-delay: 2s;
+        }
+        
+        .comparison-card {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .comparison-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #f97316, #fb923c);
+            transform: scaleX(0);
+            transition: transform 0.5s ease;
+        }
+        
+        .comparison-card:hover::before {
+            transform: scaleX(1);
+        }
+    </style>
+</head>
+<body class="bg-wyssey-darker text-white overflow-x-hidden">
+    <!-- Noise overlay -->
+    <div class="noise-overlay"></div>
+    
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-wyssey-darker/80 backdrop-blur-xl border-b border-wyssey-border/50">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <a href="#" class="flex items-center gap-3 group">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-wyssey-accent to-wyssey-accent-light flex items-center justify-center shadow-lg shadow-wyssey-accent/20 group-hover:shadow-wyssey-accent/40 transition-shadow">
+                        <i data-lucide="compass" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <span class="font-display text-2xl text-white tracking-tight">Wyssey</span>
+                </a>
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="#vision" class="text-sm text-wyssey-muted hover:text-white transition-colors">Vision</a>
+                    <a href="#mentors" class="text-sm text-wyssey-muted hover:text-white transition-colors">Mentors</a>
+                    <a href="#value" class="text-sm text-wyssey-muted hover:text-white transition-colors">Why Us</a>
+                </div>
+                <a href="#start" class="btn-primary px-6 py-2.5 rounded-full text-sm font-semibold">
+                    <span class="flex items-center gap-2">
+                        Start Now
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
+        <!-- Background effects -->
+        <div class="absolute inset-0 grid-pattern opacity-50"></div>
+        <div class="hero-glow top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2"></div>
+        <div class="hero-glow bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 opacity-50"></div>
+        
+        <!-- Floating icons -->
+        <div class="absolute top-32 left-[15%] animate-float opacity-20">
+            <i data-lucide="lightbulb" class="w-12 h-12 text-wyssey-accent"></i>
+        </div>
+        <div class="absolute top-48 right-[20%] animate-float-delayed opacity-20">
+            <i data-lucide="target" class="w-10 h-10 text-wyssey-accent-light"></i>
+        </div>
+        <div class="absolute bottom-32 left-[20%] animate-float opacity-15">
+            <i data-lucide="flame" class="w-14 h-14 text-wyssey-accent"></i>
+        </div>
+        <div class="absolute bottom-48 right-[15%] animate-float-delayed opacity-20">
+            <i data-lucide="rocket" class="w-10 h-10 text-wyssey-accent-light"></i>
+        </div>
+        
+        <div class="relative z-10 max-w-5xl mx-auto px-6 text-center">
+            <div class="animate-fade-up opacity-0" style="animation-fill-mode: forwards;">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-wyssey-card border border-wyssey-border mb-8">
+                    <span class="w-2 h-2 rounded-full bg-wyssey-accent animate-pulse"></span>
+                    <span class="text-sm text-wyssey-muted">Guidance that transforms lives</span>
+                </div>
+            </div>
+            
+            <h1 class="animate-fade-up opacity-0 font-display text-5xl md:text-7xl lg:text-8xl leading-[1.1] mb-8" style="animation-delay: 0.1s; animation-fill-mode: forwards;">
+                What if you could ask<br>
+                <span class="gradient-text italic">the greats</span> anything?
+            </h1>
+            
+            <p class="animate-fade-up opacity-0 text-lg md:text-xl text-wyssey-muted max-w-2xl mx-auto mb-12 leading-relaxed" style="animation-delay: 0.2s; animation-fill-mode: forwards;">
+                Stop waiting for answers. Stop second-guessing yourself. Get the clarity and confidence you need — instantly.
+            </p>
+            
+            <div class="animate-fade-up opacity-0 flex flex-col sm:flex-row items-center justify-center gap-4" style="animation-delay: 0.3s; animation-fill-mode: forwards;">
+                <a href="#start" class="btn-primary px-8 py-4 rounded-full text-lg font-semibold w-full sm:w-auto">
+                    <span class="flex items-center justify-center gap-3">
+                        Begin Your Journey
+                        <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                    </span>
+                </a>
+                <a href="#vision" class="flex items-center gap-2 px-6 py-4 text-wyssey-muted hover:text-white transition-colors">
+                    <i data-lucide="play-circle" class="w-5 h-5"></i>
+                    <span>See the vision</span>
+                </a>
+            </div>
+            
+            <!-- Trust indicators -->
+            <div class="animate-fade-up opacity-0 mt-16 pt-16 border-t border-wyssey-border/30" style="animation-delay: 0.4s; animation-fill-mode: forwards;">
+                <p class="text-sm text-wyssey-muted mb-6">Trusted by ambitious minds everywhere</p>
+                <div class="flex items-center justify-center gap-8 md:gap-16">
+                    <div class="text-center">
+                        <div class="text-3xl md:text-4xl font-bold text-white">50K+</div>
+                        <div class="text-sm text-wyssey-muted">Questions Asked</div>
+                    </div>
+                    <div class="w-px h-12 bg-wyssey-border"></div>
+                    <div class="text-center">
+                        <div class="text-3xl md:text-4xl font-bold text-white">4.9</div>
+                        <div class="text-sm text-wyssey-muted">User Rating</div>
+                    </div>
+                    <div class="w-px h-12 bg-wyssey-border"></div>
+                    <div class="text-center">
+                        <div class="text-3xl md:text-4xl font-bold text-white">&lt;3s</div>
+                        <div class="text-sm text-wyssey-muted">Response Time</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Scroll indicator -->
+        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+            <i data-lucide="chevrons-down" class="w-6 h-6 text-wyssey-muted"></i>
+        </div>
+    </section>
+
+    <!-- Problem Section -->
+    <section class="relative py-32 overflow-hidden">
+        <div class="divider-gradient mb-32"></div>
+        
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="scroll-fade text-center mb-20">
+                <span class="inline-block text-sm text-wyssey-accent font-semibold tracking-wider uppercase mb-4">The Problem</span>
+                <h2 class="font-display text-4xl md:text-6xl mb-6">
+                    You're not stuck.<br>
+                    <span class="text-wyssey-muted">You just need the right guidance.</span>
+                </h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="scroll-fade stat-card rounded-2xl p-8 hover:border-wyssey-accent/30 transition-all duration-300">
+                    <div class="icon-wrapper w-14 h-14 rounded-xl bg-wyssey-accent/10 flex items-center justify-center mb-6">
+                        <i data-lucide="clock" class="w-7 h-7 text-wyssey-accent"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Waiting for answers</h3>
+                    <p class="text-wyssey-muted leading-relaxed">
+                        Weeks pass. Months pass. Your question remains unanswered while opportunities slip away.
+                    </p>
+                </div>
+                
+                <div class="scroll-fade stat-card rounded-2xl p-8 hover:border-wyssey-accent/30 transition-all duration-300" style="transition-delay: 0.1s;">
+                    <div class="icon-wrapper w-14 h-14 rounded-xl bg-wyssey-accent/10 flex items-center justify-center mb-6">
+                        <i data-lucide="user-x" class="w-7 h-7 text-wyssey-accent"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">No real mentorship</h3>
+                    <p class="text-wyssey-muted leading-relaxed">
+                        The people who could help you the most are impossible to reach. Until now.
+                    </p>
+                </div>
+                
+                <div class="scroll-fade stat-card rounded-2xl p-8 hover:border-wyssey-accent/30 transition-all duration-300" style="transition-delay: 0.2s;">
+                    <div class="icon-wrapper w-14 h-14 rounded-xl bg-wyssey-accent/10 flex items-center justify-center mb-6">
+                        <i data-lucide="compass" class="w-7 h-7 text-wyssey-accent"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Lost direction</h3>
+                    <p class="text-wyssey-muted leading-relaxed">
+                        You know you're meant for more, but the path forward feels unclear and overwhelming.
+                    </p>
+                </div>
+                
+                <div class="scroll-fade stat-card rounded-2xl p-8 hover:border-wyssey-accent/30 transition-all duration-300" style="transition-delay: 0.3s;">
+                    <div class="icon-wrapper w-14 h-14 rounded-xl bg-wyssey-accent/10 flex items-center justify-center mb-6">
+                        <i data-lucide="brain" class="w-7 h-7 text-wyssey-accent"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Endless overthinking</h3>
+                    <p class="text-wyssey-muted leading-relaxed">
+                        You analyze every angle. You hesitate. Meanwhile, life moves on without you.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Vision Section -->
+    <section id="vision" class="relative py-32 overflow-hidden">
+        <div class="hero-glow top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+        
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div class="scroll-fade">
+                    <span class="inline-block text-sm text-wyssey-accent font-semibold tracking-wider uppercase mb-4">The Vision</span>
+                    <h2 class="font-display text-4xl md:text-5xl lg:text-6xl mb-8 leading-tight">
+                        Imagine having a <span class="italic gradient-text">legendary mind</span> in your corner
+                    </h2>
+                    <p class="text-lg text-wyssey-muted mb-8 leading-relaxed">
+                        What would change if you could get honest, direct advice from the world's most successful thinkers — whenever you needed it?
+                    </p>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-4">
+                            <div class="w-8 h-8 rounded-lg bg-wyssey-accent/10 flex items-center justify-center flex-shrink-0 mt-1">
+                                <i data-lucide="check" class="w-4 h-4 text-wyssey-accent"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold mb-1">Instant clarity</h4>
+                                <p class="text-wyssey-muted">No more waiting. Get perspective on your situation right now.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <div class="w-8 h-8 rounded-lg bg-wyssey-accent/10 flex items-center justify-center flex-shrink-0 mt-1">
+                                <i data-lucide="check" class="w-4 h-4 text-wyssey-accent"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold mb-1">Unfiltered wisdom</h4>
+                                <p class="text-wyssey-muted">Real talk. No sugarcoating. The truth you need to hear.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <div class="w-8 h-8 rounded-lg bg-wyssey-accent/10 flex items-center justify-center flex-shrink-0 mt-1">
+                                <i data-lucide="check" class="w-4 h-4 text-wyssey-accent"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold mb-1">Confidence to act</h4>
+                                <p class="text-wyssey-muted">Move forward without doubt. Make decisions that matter.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="scroll-fade relative">
+                    <div class="relative bg-wyssey-card border border-wyssey-border rounded-3xl p-8 md:p-12">
+                        <div class="absolute -top-4 -right-4 w-24 h-24 bg-wyssey-accent/10 rounded-full blur-2xl"></div>
+                        <div class="absolute -bottom-4 -left-4 w-32 h-32 bg-wyssey-accent/5 rounded-full blur-3xl"></div>
+                        
+                        <div class="relative">
+                            <i data-lucide="quote" class="w-12 h-12 text-wyssey-accent/30 mb-6"></i>
+                            <p class="font-display text-2xl md:text-3xl italic leading-relaxed mb-8">
+                                "One conversation with the right person can save you ten years of wasted effort."
+                            </p>
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-wyssey-accent to-wyssey-accent-light flex items-center justify-center">
+                                    <i data-lucide="sparkles" class="w-6 h-6 text-white"></i>
+                                </div>
+                                <div>
+                                    <div class="font-semibold">The Wyssey Philosophy</div>
+                                    <div class="text-sm text-wyssey-muted">Wisdom without the wait</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mentors Section -->
+    <section id="mentors" class="relative py-32 overflow-hidden">
+        <div class="divider-gradient mb-32"></div>
+        
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="scroll-fade text-center mb-20">
+                <span class="inline-block text-sm text-wyssey-accent font-semibold tracking-wider uppercase mb-4">The Guides</span>
+                <h2 class="font-display text-4xl md:text-6xl mb-6">
+                    Learn from minds that<br>
+                    <span class="italic gradient-text">shaped history</span>
+                </h2>
+                <p class="text-lg text-wyssey-muted max-w-2xl mx-auto">
+                    Tap into the wisdom of legendary thinkers, entrepreneurs, and warriors. Their insights, your advantage.
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Mentor Card 1 -->
+                <div class="scroll-fade mentor-card rounded-3xl p-8 overflow-hidden">
+                    <div class="card-glow"></div>
+                    <div class="relative">
+                        <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-red-500/20 to-orange-500/20 flex items-center justify-center mb-6 border border-red-500/20">
+                            <i data-lucide="sword" class="w-10 h-10 text-red-400"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-2">The Warrior</h3>
+                        <p class="text-wyssey-accent text-sm mb-4">Discipline • Mindset • Success</p>
+                        <p class="text-wyssey-muted leading-relaxed mb-6">
+                            Raw, unfiltered perspective on masculinity, wealth, and winning in life. No excuses. No shortcuts.
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-wyssey-dark rounded-full text-xs text-wyssey-muted">Motivation</span>
+                            <span class="px-3 py-1 bg-wyssey-dark rounded-full text-xs text-wyssey-muted">Business</span>
+                            <span class="px-3 py-1 bg-wyssey-dark rounded-full text-xs text-wyssey-muted">Mindset</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mentor Card 2 -->
+                <div class="scroll-fade mentor-card rounded-3xl p-8 overflow-hidden" style="transition-delay: 0.1s;">
+                    <div class="card-glow"></div>
+                    <div class="relative">
+                        <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center mb-6 border border-blue-500/20">
+                            <i data-lucide="mountain" class="w-10 h-10 text-blue-400"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-2">The Operator</h3>
+                        <p class="text-wyssey-accent text-sm mb-4">Mental Toughness • Grit • Excellence</p>
+                        <p class="text-wyssey-muted leading-relaxed mb-6">
+                            Push beyond your limits. Discover what you're truly capable of. Embrace the pain that builds champions.
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-wyssey-dark rounded-full text-xs text-wyssey-muted">Fitness</span>
+                            <span class="px-3 py-1 bg-wyssey-dark rounded-full text-xs text-wyssey-muted">Discipline</span>
+                            <span class="px-3 py-1 bg-wyssey-dark rounded-full text-xs text-wyssey-muted">Growth</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mentor Card 3 -->
+                <div class="scroll-fade mentor-card rounded-3xl p-8 overflow-hidden" style="transition-delay: 0.2s;">
+                    <div class="card-glow"></div>
+                    <div class="relative">
+                        <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center mb-6 border border-emerald-500/20">
+                            <i data-lucide="trending-up" class="w-10 h-10 text-emerald-400"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-2">The Strategist</h3>
+                        <p class="text-wyssey-accent text-sm mb-4">Scale • Systems • Wealth</p>
+                        <p class="text-wyssey-muted leading-relaxed mb-6">
+                            Master the art of building businesses that print money. Learn offers, leverage, and compound growth.
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-wyssey-dark rounded-full text-xs text-wyssey-muted">Business</span>
+                            <span class="px-3 py-1 bg-wyssey-dark rounded-full text-xs text-wyssey-muted">Marketing</span>
+                            <span class="px-3 py-1 bg-wyssey-dark rounded-full text-xs text-wyssey-muted">Scale</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="scroll-fade text-center mt-16">
+                <p class="text-wyssey-muted mb-6">And many more legendary minds to guide your journey...</p>
+                <a href="#start" class="inline-flex items-center gap-2 text-wyssey-accent hover:text-wyssey-accent-light transition-colors">
+                    <span>Explore all mentors</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Value Section -->
+    <section id="value" class="relative py-32 overflow-hidden">
+        <div class="hero-glow bottom-0 right-0 translate-x-1/2 translate-y-1/2"></div>
+        
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="scroll-fade text-center mb-20">
+                <span class="inline-block text-sm text-wyssey-accent font-semibold tracking-wider uppercase mb-4">The Value</span>
+                <h2 class="font-display text-4xl md:text-6xl mb-6">
+                    Skip the expensive lessons.<br>
+                    <span class="text-wyssey-muted">Get to the wisdom.</span>
+                </h2>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="scroll-fade comparison-card stat-card rounded-2xl p-8">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center">
+                            <i data-lucide="x" class="w-6 h-6 text-red-400"></i>
+                        </div>
+                        <span class="text-wyssey-muted">The Old Way</span>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-4">Expensive Courses</h3>
+                    <ul class="space-y-3 text-wyssey-muted">
+                        <li class="flex items-start gap-2">
+                            <i data-lucide="minus" class="w-4 h-4 mt-1 flex-shrink-0"></i>
+                            <span>$2,000+ for recorded content</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i data-lucide="minus" class="w-4 h-4 mt-1 flex-shrink-0"></i>
+                            <span>Generic, one-size-fits-all advice</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i data-lucide="minus" class="w-4 h-4 mt-1 flex-shrink-0"></i>
+                            <span>Can't ask follow-up questions</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="scroll-fade comparison-card stat-card rounded-2xl p-8" style="transition-delay: 0.1s;">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-12 h-12 rounded-xl bg-yellow-500/10 flex items-center justify-center">
+                            <i data-lucide="hourglass" class="w-6 h-6 text-yellow-400"></i>
+                        </div>
+                        <span class="text-wyssey-muted">The Slow Way</span>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-4">Waiting for Answers</h3>
+                    <ul class="space-y-3 text-wyssey-muted">
+                        <li class="flex items-start gap-2">
+                            <i data-lucide="minus" class="w-4 h-4 mt-1 flex-shrink-0"></i>
+                            <span>Months until your topic is covered</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i data-lucide="minus" class="w-4 h-4 mt-1 flex-shrink-0"></i>
+                            <span>Your specific question never addressed</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i data-lucide="minus" class="w-4 h-4 mt-1 flex-shrink-0"></i>
+                            <span>Opportunities lost to hesitation</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="scroll-fade comparison-card stat-card rounded-2xl p-8 border-wyssey-accent/30" style="transition-delay: 0.2s;">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-12 h-12 rounded-xl bg-wyssey-accent/20 flex items-center justify-center">
+                            <i data-lucide="zap" class="w-6 h-6 text-wyssey-accent"></i>
+                        </div>
+                        <span class="text-wyssey-accent font-semibold">The Wyssey Way</span>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-4">Instant Guidance</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start gap-2 text-white">
+                            <i data-lucide="check" class="w-4 h-4 mt-1 flex-shrink-0 text-wyssey-accent"></i>
+                            <span>Get answers in seconds</span>
+                        </li>
+                        <li class="flex items-start gap-2 text-white">
+                            <i data-lucide="check" class="w-4 h-4 mt-1 flex-shrink-0 text-wyssey-accent"></i>
+                            <span>Personalized to your situation</span>
+                        </li>
+                        <li class="flex items-start gap-2 text-white">
+                            <i data-lucide="check" class="w-4 h-4 mt-1 flex-shrink-0 text-wyssey-accent"></i>
+                            <span>Ask anything, anytime</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- One Insight Section -->
+    <section class="relative py-32 overflow-hidden">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <div class="scroll-fade">
+                <div class="w-24 h-24 rounded-3xl bg-gradient-to-br from-wyssey-accent/20 to-wyssey-accent-light/20 flex items-center justify-center mx-auto mb-12 border border-wyssey-accent/20">
+                    <i data-lucide="lightbulb" class="w-12 h-12 text-wyssey-accent"></i>
+                </div>
+                <h2 class="font-display text-4xl md:text-5xl lg:text-6xl italic mb-8">
+                    One insight can change everything.
+                </h2>
+                <p class="text-xl text-wyssey-muted leading-relaxed max-w-2xl mx-auto">
+                    The right words at the right time have launched empires, saved relationships, and transformed ordinary people into legends. Your moment of clarity is waiting.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA Section -->
+    <section id="start" class="relative py-32 overflow-hidden">
+        <div class="divider-gradient mb-32"></div>
+        
+        <!-- Background effects -->
+        <div class="absolute inset-0 grid-pattern opacity-30"></div>
+        <div class="hero-glow top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px]"></div>
+        
+        <div class="relative max-w-4xl mx-auto px-6 text-center">
+            <div class="scroll-fade">
+                <span class="inline-block text-sm text-wyssey-accent font-semibold tracking-wider uppercase mb-4">Ready?</span>
+                <h2 class="font-display text-4xl md:text-6xl lg:text-7xl mb-8">
+                    Your journey to clarity<br>
+                    <span class="italic gradient-text">starts now</span>
+                </h2>
+                <p class="text-xl text-wyssey-muted mb-12 max-w-xl mx-auto">
+                    No signup friction. No waiting. Just instant access to the guidance you've been searching for.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+                    <a href="#" class="btn-primary px-10 py-5 rounded-full text-lg font-semibold w-full sm:w-auto">
+                        <span class="flex items-center justify-center gap-3">
+                            <i data-lucide="play" class="w-5 h-5"></i>
+                            Start Your First Conversation
+                        </span>
+                    </a>
+                </div>
+                
+                <div class="flex items-center justify-center gap-8 text-sm text-wyssey-muted">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="shield-check" class="w-4 h-4 text-wyssey-accent"></i>
+                        <span>No credit card</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="zap" class="w-4 h-4 text-wyssey-accent"></i>
+                        <span>Instant access</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="lock" class="w-4 h-4 text-wyssey-accent"></i>
+                        <span>Private & secure</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-wyssey-border py-12">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-wyssey-accent to-wyssey-accent-light flex items-center justify-center">
+                        <i data-lucide="compass" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <span class="font-display text-2xl text-white">Wyssey</span>
+                </div>
+                <div class="flex items-center gap-8 text-sm text-wyssey-muted">
+                    <a href="#" class="hover:text-white transition-colors">Privacy</a>
+                    <a href="#" class="hover:text-white transition-colors">Terms</a>
+                    <a href="#" class="hover:text-white transition-colors">Contact</a>
+                </div>
+                <div class="text-sm text-wyssey-muted">
+                    © 2024 Wyssey. All rights reserved.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        // Scroll animations
+        const scrollElements = document.querySelectorAll('.scroll-fade');
+        
+        const elementInView = (el, percentageScroll = 100) => {
+            const elementTop = el.getBoundingClientRect().top;
+            return (
+                elementTop <= 
+                ((window.innerHeight || document.documentElement.clientHeight) * (percentageScroll/100))
+            );
+        };
+        
+        const displayScrollElement = (element) => {
+            element.classList.add('visible');
+        };
+        
+        const handleScrollAnimation = () => {
+            scrollElements.forEach((el) => {
+                if (elementInView(el, 85)) {
+                    displayScrollElement(el);
+                }
+            });
+        };
+        
+        // Initial check
+        handleScrollAnimation();
+        
+        // Throttled scroll listener
+        let ticking = false;
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    handleScrollAnimation();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // Parallax effect for hero glows
+        window.addEventListener('mousemove', (e) => {
+            const glows = document.querySelectorAll('.hero-glow');
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            
+            glows.forEach((glow, index) => {
+                const speed = (index + 1) * 10;
+                const xOffset = (x - 0.5) * speed;
+                const yOffset = (y - 0.5) * speed;
+                glow.style.transform = `translate(calc(-50% + ${xOffset}px), calc(-50% + ${yOffset}px))`;
+            });
+        });
+        
+        // Navigation background on scroll
+        const nav = document.querySelector('nav');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                nav.classList.add('bg-wyssey-darker/95');
+                nav.classList.remove('bg-wyssey-darker/80');
+            } else {
+                nav.classList.remove('bg-wyssey-darker/95');
+                nav.classList.add('bg-wyssey-darker/80');
+            }
+        });
+    </script>
+</body>
+</html>
