@@ -10,6 +10,331 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PVM3S566DM"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-PVM3S566DM', {
+            'send_page_view': false, // We'll send custom page view
+            'cookie_flags': 'SameSite=None;Secure'
+        });
+
+        // ============================================
+        // WYSSEY ANALYTICS TRACKING SYSTEM
+        // ============================================
+        
+        const WysseyAnalytics = {
+            // Configuration
+            config: {
+                page: 'landing',
+                sessionId: 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                startTime: Date.now(),
+                lastActiveTime: Date.now(),
+                totalActiveTime: 0,
+                isActive: true,
+                scrollMilestones: [10, 25, 50, 75, 90, 100],
+                trackedScrollMilestones: new Set(),
+                trackedSections: new Set(),
+                interactionCount: 0
+            },
+
+            // Initialize tracking
+            init: function() {
+                this.trackPageView();
+                this.setupTimeTracking();
+                this.setupScrollTracking();
+                this.setupSectionTracking();
+                this.setupExitTracking();
+                this.setupClickTracking();
+                console.log('[WysseyAnalytics] Initialized for:', this.config.page);
+            },
+
+            // ============================================
+            // PAGE VIEW TRACKING
+            // ============================================
+            trackPageView: function() {
+                gtag('event', 'page_view_landing', {
+                    event_category: 'page_view',
+                    event_label: 'landing_page',
+                    page_title: document.title,
+                    page_location: window.location.href,
+                    session_id: this.config.sessionId,
+                    timestamp: new Date().toISOString()
+                });
+            },
+
+            // ============================================
+            // TIME TRACKING
+            // ============================================
+            setupTimeTracking: function() {
+                const self = this;
+
+                // Track visibility changes
+                document.addEventListener('visibilitychange', function() {
+                    if (document.hidden) {
+                        self.config.isActive = false;
+                        self.config.totalActiveTime += (Date.now() - self.config.lastActiveTime);
+                        self.trackTimeEvent('landing_tab_hidden');
+                    } else {
+                        self.config.isActive = true;
+                        self.config.lastActiveTime = Date.now();
+                        self.trackTimeEvent('landing_tab_visible');
+                    }
+                });
+
+                // Track active time every 15 seconds
+                setInterval(function() {
+                    if (self.config.isActive) {
+                        self.config.totalActiveTime += (Date.now() - self.config.lastActiveTime);
+                        self.config.lastActiveTime = Date.now();
+                    }
+                }, 15000);
+
+                // Track time milestones (30s, 60s, 120s, 300s)
+                const timeMilestones = [30, 60, 120, 300];
+                const trackedTimeMilestones = new Set();
+
+                setInterval(function() {
+                    const totalSeconds = Math.floor(self.getTotalActiveTime() / 1000);
+                    timeMilestones.forEach(function(milestone) {
+                        if (totalSeconds >= milestone && !trackedTimeMilestones.has(milestone)) {
+                            trackedTimeMilestones.add(milestone);
+                            gtag('event', 'landing_time_milestone', {
+                                event_category: 'engagement',
+                                event_label: 'time_' + milestone + 's',
+                                value: milestone,
+                                session_id: self.config.sessionId
+                            });
+                        }
+                    });
+                }, 5000);
+            },
+
+            getTotalActiveTime: function() {
+                let total = this.config.totalActiveTime;
+                if (this.config.isActive) {
+                    total += (Date.now() - this.config.lastActiveTime);
+                }
+                return total;
+            },
+
+            trackTimeEvent: function(eventName) {
+                gtag('event', eventName, {
+                    event_category: 'engagement',
+                    event_label: 'visibility',
+                    time_on_page_seconds: Math.floor(this.getTotalActiveTime() / 1000),
+                    session_id: this.config.sessionId
+                });
+            },
+
+            // ============================================
+            // SCROLL TRACKING
+            // ============================================
+            setupScrollTracking: function() {
+                const self = this;
+                let ticking = false;
+
+                window.addEventListener('scroll', function() {
+                    if (!ticking) {
+                        window.requestAnimationFrame(function() {
+                            self.handleScroll();
+                            ticking = false;
+                        });
+                        ticking = true;
+                    }
+                });
+            },
+
+            handleScroll: function() {
+                const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+                const scrollPercent = Math.round((window.scrollY / scrollHeight) * 100);
+                const self = this;
+
+                this.config.scrollMilestones.forEach(function(milestone) {
+                    if (scrollPercent >= milestone && !self.config.trackedScrollMilestones.has(milestone)) {
+                        self.config.trackedScrollMilestones.add(milestone);
+                        gtag('event', 'landing_scroll_depth', {
+                            event_category: 'engagement',
+                            event_label: 'scroll_' + milestone + '_percent',
+                            value: milestone,
+                            session_id: self.config.sessionId,
+                            time_to_scroll: Math.floor(self.getTotalActiveTime() / 1000)
+                        });
+                    }
+                });
+            },
+
+            // ============================================
+            // SECTION VISIBILITY TRACKING
+            // ============================================
+            setupSectionTracking: function() {
+                const self = this;
+                const sections = {
+                    'hero': document.querySelector('section:first-of-type'),
+                    'problem': document.querySelector('section:nth-of-type(2)'),
+                    'vision': document.getElementById('vision'),
+                    'mentors': document.getElementById('mentors'),
+                    'value': document.getElementById('value'),
+                    'insight': document.querySelector('section:nth-of-type(6)'),
+                    'cta': document.getElementById('start')
+                };
+
+                const observer = new IntersectionObserver(function(entries) {
+                    entries.forEach(function(entry) {
+                        if (entry.isIntersecting) {
+                            const sectionName = entry.target.dataset.section;
+                            if (sectionName && !self.config.trackedSections.has(sectionName)) {
+                                self.config.trackedSections.add(sectionName);
+                                gtag('event', 'landing_section_view', {
+                                    event_category: 'engagement',
+                                    event_label: 'section_' + sectionName,
+                                    section_name: sectionName,
+                                    session_id: self.config.sessionId,
+                                    time_to_view: Math.floor(self.getTotalActiveTime() / 1000)
+                                });
+                            }
+                        }
+                    });
+                }, { threshold: 0.3 });
+
+                // Add data attributes and observe sections
+                Object.keys(sections).forEach(function(name) {
+                    const section = sections[name];
+                    if (section) {
+                        section.dataset.section = name;
+                        observer.observe(section);
+                    }
+                });
+
+                // Track hero immediately
+                if (!this.config.trackedSections.has('hero')) {
+                    this.config.trackedSections.add('hero');
+                    gtag('event', 'landing_section_view', {
+                        event_category: 'engagement',
+                        event_label: 'section_hero',
+                        section_name: 'hero',
+                        session_id: this.config.sessionId,
+                        time_to_view: 0
+                    });
+                }
+            },
+
+            // ============================================
+            // EXIT TRACKING
+            // ============================================
+            setupExitTracking: function() {
+                const self = this;
+
+                window.addEventListener('beforeunload', function() {
+                    // Calculate final metrics
+                    if (self.config.isActive) {
+                        self.config.totalActiveTime += (Date.now() - self.config.lastActiveTime);
+                    }
+
+                    const finalData = {
+                        event_category: 'exit',
+                        event_label: 'landing_exit',
+                        time_on_page_seconds: Math.floor(self.getTotalActiveTime() / 1000),
+                        max_scroll_depth: Math.max(...self.config.trackedScrollMilestones) || 0,
+                        sections_viewed: self.config.trackedSections.size,
+                        sections_list: Array.from(self.config.trackedSections).join(','),
+                        interaction_count: self.config.interactionCount,
+                        session_id: self.config.sessionId
+                    };
+
+                    // Use sendBeacon for reliable exit tracking
+                    gtag('event', 'landing_exit', finalData);
+
+                    // Also track final time
+                    gtag('event', 'time_on_landing', {
+                        event_category: 'time_tracking',
+                        event_label: 'final_time',
+                        value: Math.floor(self.getTotalActiveTime() / 1000),
+                        session_id: self.config.sessionId
+                    });
+                });
+            },
+
+            // ============================================
+            // CLICK TRACKING
+            // ============================================
+            setupClickTracking: function() {
+                const self = this;
+
+                // Track all clicks with data-track attribute
+                document.addEventListener('click', function(e) {
+                    const trackElement = e.target.closest('[data-track]');
+                    if (trackElement) {
+                        const trackName = trackElement.dataset.track;
+                        const trackCategory = trackElement.dataset.trackCategory || 'click';
+                        const trackLabel = trackElement.dataset.trackLabel || trackName;
+
+                        self.config.interactionCount++;
+
+                        gtag('event', 'landing_' + trackName, {
+                            event_category: trackCategory,
+                            event_label: trackLabel,
+                            element_text: trackElement.textContent.trim().substring(0, 50),
+                            session_id: self.config.sessionId,
+                            interaction_number: self.config.interactionCount,
+                            time_to_click: Math.floor(self.getTotalActiveTime() / 1000)
+                        });
+                    }
+                });
+            },
+
+            // ============================================
+            // CUSTOM EVENT TRACKING
+            // ============================================
+            trackEvent: function(eventName, params) {
+                params = params || {};
+                params.session_id = this.config.sessionId;
+                params.time_on_page = Math.floor(this.getTotalActiveTime() / 1000);
+                
+                this.config.interactionCount++;
+                params.interaction_number = this.config.interactionCount;
+
+                gtag('event', eventName, params);
+            },
+
+            // Track CTA clicks specifically
+            trackCTA: function(ctaName, ctaLocation) {
+                this.trackEvent('landing_cta_click', {
+                    event_category: 'conversion',
+                    event_label: ctaName,
+                    cta_name: ctaName,
+                    cta_location: ctaLocation
+                });
+            },
+
+            // Track navigation clicks
+            trackNavigation: function(destination) {
+                this.trackEvent('landing_navigation_click', {
+                    event_category: 'navigation',
+                    event_label: destination,
+                    destination: destination
+                });
+            },
+
+            // Track external link clicks
+            trackExternalLink: function(linkUrl, linkText) {
+                this.trackEvent('landing_external_link', {
+                    event_category: 'outbound',
+                    event_label: linkText,
+                    link_url: linkUrl
+                });
+            }
+        };
+
+        // Initialize on DOM ready
+        document.addEventListener('DOMContentLoaded', function() {
+            WysseyAnalytics.init();
+        });
+    </script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -236,19 +561,18 @@
     <nav class="fixed top-0 left-0 right-0 z-50 bg-wyssey-darker/80 backdrop-blur-xl border-b border-wyssey-border/50">
         <div class="max-w-7xl mx-auto px-6 py-4">
             <div class="flex items-center justify-between">
-                <a href="#" class="flex items-center gap-3 group">
+                <a href="#" class="flex items-center gap-3 group" data-track="logo_click" data-track-category="navigation" data-track-label="logo">
                     <div class="w-10 h-10 rounded-xl bg-black flex items-center justify-center shadow-lg shadow-black/20 group-hover:shadow-black/40 transition-shadow">
-    <img src="logo32x32.png" alt="">
-</div>
-
+                        <img src="logo32x32.png" alt="">
+                    </div>
                     <span class="font-display text-2xl text-white tracking-tight">Wyssey</span>
                 </a>
                 <div class="hidden md:flex items-center gap-8">
-                    <a href="#vision" class="text-sm text-wyssey-muted hover:text-white transition-colors">Vision</a>
-                    <a href="#mentors" class="text-sm text-wyssey-muted hover:text-white transition-colors">Mentors</a>
-                    <a href="#value" class="text-sm text-wyssey-muted hover:text-white transition-colors">Why Us</a>
+                    <a href="#vision" class="text-sm text-wyssey-muted hover:text-white transition-colors" data-track="nav_vision" data-track-category="navigation" data-track-label="nav_vision">Vision</a>
+                    <a href="#mentors" class="text-sm text-wyssey-muted hover:text-white transition-colors" data-track="nav_mentors" data-track-category="navigation" data-track-label="nav_mentors">Mentors</a>
+                    <a href="#value" class="text-sm text-wyssey-muted hover:text-white transition-colors" data-track="nav_value" data-track-category="navigation" data-track-label="nav_value">Why Us</a>
                 </div>
-                <a href="#start" class="btn-primary px-6 py-2.5 rounded-full text-sm font-semibold">
+                <a href="chat.html" class="btn-primary px-6 py-2.5 rounded-full text-sm font-semibold" data-track="cta_nav_start" data-track-category="conversion" data-track-label="nav_cta">
                     <span class="flex items-center gap-2">
                         Start Now
                         <i data-lucide="arrow-right" class="w-4 h-4"></i>
@@ -259,7 +583,7 @@
     </nav>
 
     <!-- Hero Section -->
-    <section class="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
+    <section class="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden" data-section="hero">
         <!-- Background effects -->
         <div class="absolute inset-0 grid-pattern opacity-50"></div>
         <div class="hero-glow top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2"></div>
@@ -297,13 +621,13 @@
             </p>
             
             <div class="animate-fade-up opacity-0 flex flex-col sm:flex-row items-center justify-center gap-4" style="animation-delay: 0.3s; animation-fill-mode: forwards;">
-                <a href="#start" class="btn-primary px-8 py-4 rounded-full text-lg font-semibold w-full sm:w-auto">
+                <a href="chat.html" class="btn-primary px-8 py-4 rounded-full text-lg font-semibold w-full sm:w-auto" data-track="cta_hero_primary" data-track-category="conversion" data-track-label="hero_begin_journey">
                     <span class="flex items-center justify-center gap-3">
                         Begin Your Journey
                         <i data-lucide="chevron-right" class="w-5 h-5"></i>
                     </span>
                 </a>
-                <a href="#vision" class="flex items-center gap-2 px-6 py-4 text-wyssey-muted hover:text-white transition-colors">
+                <a href="#vision" class="flex items-center gap-2 px-6 py-4 text-wyssey-muted hover:text-white transition-colors" data-track="cta_hero_secondary" data-track-category="engagement" data-track-label="hero_see_vision">
                     <i data-lucide="play-circle" class="w-5 h-5"></i>
                     <span>See the vision</span>
                 </a>
@@ -338,7 +662,7 @@
     </section>
 
     <!-- Problem Section -->
-    <section class="relative py-32 overflow-hidden">
+    <section class="relative py-32 overflow-hidden" data-section="problem">
         <div class="divider-gradient mb-32"></div>
         
         <div class="max-w-7xl mx-auto px-6">
@@ -351,7 +675,7 @@
             </div>
             
             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="scroll-fade stat-card rounded-2xl p-8 hover:border-wyssey-accent/30 transition-all duration-300">
+                <div class="scroll-fade stat-card rounded-2xl p-8 hover:border-wyssey-accent/30 transition-all duration-300" data-track="problem_card_waiting" data-track-category="engagement" data-track-label="problem_waiting">
                     <div class="icon-wrapper w-14 h-14 rounded-xl bg-wyssey-accent/10 flex items-center justify-center mb-6">
                         <i data-lucide="clock" class="w-7 h-7 text-wyssey-accent"></i>
                     </div>
@@ -361,7 +685,7 @@
                     </p>
                 </div>
                 
-                <div class="scroll-fade stat-card rounded-2xl p-8 hover:border-wyssey-accent/30 transition-all duration-300" style="transition-delay: 0.1s;">
+                <div class="scroll-fade stat-card rounded-2xl p-8 hover:border-wyssey-accent/30 transition-all duration-300" style="transition-delay: 0.1s;" data-track="problem_card_mentorship" data-track-category="engagement" data-track-label="problem_mentorship">
                     <div class="icon-wrapper w-14 h-14 rounded-xl bg-wyssey-accent/10 flex items-center justify-center mb-6">
                         <i data-lucide="user-x" class="w-7 h-7 text-wyssey-accent"></i>
                     </div>
@@ -371,7 +695,7 @@
                     </p>
                 </div>
                 
-                <div class="scroll-fade stat-card rounded-2xl p-8 hover:border-wyssey-accent/30 transition-all duration-300" style="transition-delay: 0.2s;">
+                <div class="scroll-fade stat-card rounded-2xl p-8 hover:border-wyssey-accent/30 transition-all duration-300" style="transition-delay: 0.2s;" data-track="problem_card_direction" data-track-category="engagement" data-track-label="problem_direction">
                     <div class="icon-wrapper w-14 h-14 rounded-xl bg-wyssey-accent/10 flex items-center justify-center mb-6">
                         <i data-lucide="compass" class="w-7 h-7 text-wyssey-accent"></i>
                     </div>
@@ -381,7 +705,7 @@
                     </p>
                 </div>
                 
-                <div class="scroll-fade stat-card rounded-2xl p-8 hover:border-wyssey-accent/30 transition-all duration-300" style="transition-delay: 0.3s;">
+                <div class="scroll-fade stat-card rounded-2xl p-8 hover:border-wyssey-accent/30 transition-all duration-300" style="transition-delay: 0.3s;" data-track="problem_card_overthinking" data-track-category="engagement" data-track-label="problem_overthinking">
                     <div class="icon-wrapper w-14 h-14 rounded-xl bg-wyssey-accent/10 flex items-center justify-center mb-6">
                         <i data-lucide="brain" class="w-7 h-7 text-wyssey-accent"></i>
                     </div>
@@ -395,7 +719,7 @@
     </section>
 
     <!-- Vision Section -->
-    <section id="vision" class="relative py-32 overflow-hidden">
+    <section id="vision" class="relative py-32 overflow-hidden" data-section="vision">
         <div class="hero-glow top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
         
         <div class="max-w-7xl mx-auto px-6">
@@ -466,7 +790,7 @@
     </section>
 
     <!-- Mentors Section -->
-    <section id="mentors" class="relative py-32 overflow-hidden">
+    <section id="mentors" class="relative py-32 overflow-hidden" data-section="mentors">
         <div class="divider-gradient mb-32"></div>
         
         <div class="max-w-7xl mx-auto px-6">
@@ -483,7 +807,7 @@
             
             <div class="grid md:grid-cols-3 gap-8">
                 <!-- Mentor Card 1 -->
-                <div class="scroll-fade mentor-card rounded-3xl p-8 overflow-hidden">
+                <div class="scroll-fade mentor-card rounded-3xl p-8 overflow-hidden cursor-pointer" data-track="mentor_card_warrior" data-track-category="engagement" data-track-label="mentor_warrior">
                     <div class="card-glow"></div>
                     <div class="relative">
                         <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-red-500/20 to-orange-500/20 flex items-center justify-center mb-6 border border-red-500/20">
@@ -503,7 +827,7 @@
                 </div>
                 
                 <!-- Mentor Card 2 -->
-                <div class="scroll-fade mentor-card rounded-3xl p-8 overflow-hidden" style="transition-delay: 0.1s;">
+                <div class="scroll-fade mentor-card rounded-3xl p-8 overflow-hidden cursor-pointer" style="transition-delay: 0.1s;" data-track="mentor_card_operator" data-track-category="engagement" data-track-label="mentor_operator">
                     <div class="card-glow"></div>
                     <div class="relative">
                         <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center mb-6 border border-blue-500/20">
@@ -523,7 +847,7 @@
                 </div>
                 
                 <!-- Mentor Card 3 -->
-                <div class="scroll-fade mentor-card rounded-3xl p-8 overflow-hidden" style="transition-delay: 0.2s;">
+                <div class="scroll-fade mentor-card rounded-3xl p-8 overflow-hidden cursor-pointer" style="transition-delay: 0.2s;" data-track="mentor_card_strategist" data-track-category="engagement" data-track-label="mentor_strategist">
                     <div class="card-glow"></div>
                     <div class="relative">
                         <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center mb-6 border border-emerald-500/20">
@@ -545,7 +869,7 @@
             
             <div class="scroll-fade text-center mt-16">
                 <p class="text-wyssey-muted mb-6">And many more legendary minds to guide your journey...</p>
-                <a href="#start" class="inline-flex items-center gap-2 text-wyssey-accent hover:text-wyssey-accent-light transition-colors">
+                <a href="chat.html" class="inline-flex items-center gap-2 text-wyssey-accent hover:text-wyssey-accent-light transition-colors" data-track="cta_explore_mentors" data-track-category="conversion" data-track-label="mentors_explore">
                     <span>Explore all mentors</span>
                     <i data-lucide="arrow-right" class="w-4 h-4"></i>
                 </a>
@@ -554,7 +878,7 @@
     </section>
 
     <!-- Value Section -->
-    <section id="value" class="relative py-32 overflow-hidden">
+    <section id="value" class="relative py-32 overflow-hidden" data-section="value">
         <div class="hero-glow bottom-0 right-0 translate-x-1/2 translate-y-1/2"></div>
         
         <div class="max-w-7xl mx-auto px-6">
@@ -567,7 +891,7 @@
             </div>
             
             <div class="grid md:grid-cols-3 gap-8">
-                <div class="scroll-fade comparison-card stat-card rounded-2xl p-8">
+                <div class="scroll-fade comparison-card stat-card rounded-2xl p-8" data-track="value_card_old" data-track-category="engagement" data-track-label="value_old_way">
                     <div class="flex items-center gap-3 mb-6">
                         <div class="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center">
                             <i data-lucide="x" class="w-6 h-6 text-red-400"></i>
@@ -591,7 +915,7 @@
                     </ul>
                 </div>
                 
-                <div class="scroll-fade comparison-card stat-card rounded-2xl p-8" style="transition-delay: 0.1s;">
+                <div class="scroll-fade comparison-card stat-card rounded-2xl p-8" style="transition-delay: 0.1s;" data-track="value_card_slow" data-track-category="engagement" data-track-label="value_slow_way">
                     <div class="flex items-center gap-3 mb-6">
                         <div class="w-12 h-12 rounded-xl bg-yellow-500/10 flex items-center justify-center">
                             <i data-lucide="hourglass" class="w-6 h-6 text-yellow-400"></i>
@@ -615,7 +939,7 @@
                     </ul>
                 </div>
                 
-                <div class="scroll-fade comparison-card stat-card rounded-2xl p-8 border-wyssey-accent/30" style="transition-delay: 0.2s;">
+                <div class="scroll-fade comparison-card stat-card rounded-2xl p-8 border-wyssey-accent/30" style="transition-delay: 0.2s;" data-track="value_card_wyssey" data-track-category="engagement" data-track-label="value_wyssey_way">
                     <div class="flex items-center gap-3 mb-6">
                         <div class="w-12 h-12 rounded-xl bg-wyssey-accent/20 flex items-center justify-center">
                             <i data-lucide="zap" class="w-6 h-6 text-wyssey-accent"></i>
@@ -643,7 +967,7 @@
     </section>
 
     <!-- One Insight Section -->
-    <section class="relative py-32 overflow-hidden">
+    <section class="relative py-32 overflow-hidden" data-section="insight">
         <div class="max-w-4xl mx-auto px-6 text-center">
             <div class="scroll-fade">
                 <div class="w-24 h-24 rounded-3xl bg-gradient-to-br from-wyssey-accent/20 to-wyssey-accent-light/20 flex items-center justify-center mx-auto mb-12 border border-wyssey-accent/20">
@@ -660,7 +984,7 @@
     </section>
 
     <!-- Final CTA Section -->
-    <section id="start" class="relative py-32 overflow-hidden">
+    <section id="start" class="relative py-32 overflow-hidden" data-section="cta">
         <div class="divider-gradient mb-32"></div>
         
         <!-- Background effects -->
@@ -679,7 +1003,7 @@
                 </p>
                 
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-                    <a href="chat.html" class="btn-primary px-10 py-5 rounded-full text-lg font-semibold w-full sm:w-auto">
+                    <a href="chat.html" class="btn-primary px-10 py-5 rounded-full text-lg font-semibold w-full sm:w-auto" data-track="cta_final_start" data-track-category="conversion" data-track-label="final_start_conversation">
                         <span class="flex items-center justify-center gap-3">
                             <i data-lucide="play" class="w-5 h-5"></i>
                             Start Your First Conversation
@@ -708,18 +1032,28 @@
     <!-- Footer -->
     <footer class="border-t border-wyssey-border py-12">
         <div class="max-w-7xl mx-auto px-6">
-            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+                <!-- Branding -->
                 <div class="flex items-center gap-3">
-                     <div class="w-10 h-10 rounded-xl bg-black flex items-center justify-center shadow-lg shadow-black/20 group-hover:shadow-black/40 transition-shadow">
-    <img src="logo32x32.png" alt="">
-</div>
+                    <div class="w-10 h-10 rounded-xl bg-black flex items-center justify-center shadow-lg shadow-black/20 group-hover:shadow-black/40 transition-shadow">
+                        <img src="logo32x32.png" alt="Wyssey Logo">
+                    </div>
                     <span class="font-display text-2xl text-white">Wyssey</span>
                 </div>
-                <div class="flex items-center gap-8 text-sm text-wyssey-muted">
-                    <a href="privacy.html" class="hover:text-white transition-colors">Privacy</a>
-                    <a href="terms.html" class="hover:text-white transition-colors">Terms</a>
-                    <a href="mailto:support@wyssey.com">support@wyssey.com</a>
+
+                <!-- Trust Signals & Links -->
+                <div class="flex flex-col items-center gap-2">
+                    <div class="flex items-center gap-6 text-sm text-wyssey-muted">
+                        <a href="privacy.html" class="hover:text-white transition-colors" data-track="footer_privacy" data-track-category="navigation" data-track-label="footer_privacy">Privacy</a>
+                        <a href="terms.html" class="hover:text-white transition-colors" data-track="footer_terms" data-track-category="navigation" data-track-label="footer_terms">Terms</a>
+                        <a href="mailto:support@wyssey.com" class="hover:text-white transition-colors" data-track="footer_support" data-track-category="navigation" data-track-label="footer_support">Support</a>
+                    </div>
+                    <div class="text-[11px] text-wyssey-muted/60 uppercase tracking-wider">
+                        Zurich, Switzerland • support@wyssey.com
+                    </div>
                 </div>
+
+                <!-- Copyright -->
                 <div class="text-sm text-wyssey-muted">
                     © 2026 Wyssey. All rights reserved.
                 </div>
