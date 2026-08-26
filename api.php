@@ -1,10 +1,10 @@
 <?php
 
 // ─────────────────────────────────────────────
-// CONFIG
+// 1-on-1 chat proxy. Delegates the OpenAI call to openai.php.
 // ─────────────────────────────────────────────
 
-$OPENAI_API_KEY = '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';
+require_once __DIR__ . '/openai.php';
 
 // erlaubte Domains
 $allowed_origins = [
@@ -63,59 +63,17 @@ if (!$input || !isset($input["messages"])) {
 // OPENAI REQUEST
 // ─────────────────────────────────────────────
 
-$payload = [
-    "model" => "gpt-4o-mini",
-    "input" => $input["messages"],
-    "temperature" => $input["temperature"] ?? 0.9,
-    "max_output_tokens" => $input["max_tokens"] ?? 800
-];
-
-$ch = curl_init("https://api.openai.com/v1/responses");
-
-curl_setopt_array($ch, [
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_POST => true,
-    CURLOPT_HTTPHEADER => [
-        "Content-Type: application/json",
-        "Authorization: Bearer " . $OPENAI_API_KEY
-    ],
-    CURLOPT_POSTFIELDS => json_encode($payload),
-    CURLOPT_TIMEOUT => 90
-]);
-
-$response = curl_exec($ch);
-$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-if ($response === false) {
-    http_response_code(500);
-    echo json_encode([
-        "error" => "Curl error: " . curl_error($ch)
+try {
+    $content = wyssey_openai_chat($input["messages"], [
+        "temperature" => $input["temperature"] ?? 0.9,
+        // Keep replies short & conversational (issue #2). Callers may still
+        // override, but the default is intentionally small.
+        "max_tokens"  => $input["max_tokens"] ?? 300,
     ]);
-    curl_close($ch);
-    exit;
-}
-
-curl_close($ch);
-
-// ─────────────────────────────────────────────
-// ERROR HANDLING
-// ─────────────────────────────────────────────
-
-if ($http_code !== 200) {
-    http_response_code($http_code);
-    echo $response;
-    exit;
-}
-
-$data = json_decode($response, true);
-
-// Text aus der Response extrahieren
-$content = $data["output"][0]["content"][0]["text"] ?? null;
-
-if (!$content) {
+} catch (Exception $e) {
     http_response_code(502);
     echo json_encode([
-        "error" => "Invalid response from OpenAI"
+        "error" => $e->getMessage()
     ]);
     exit;
 }

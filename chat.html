@@ -1252,6 +1252,151 @@
                 display: flex;
             }
         }
+
+        /* ── Group Rooms ────────────────────────── */
+        .participant-strip {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            padding: 8px 12px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        @media (min-width: 640px) {
+            .participant-strip { padding: 10px 20px; }
+        }
+
+        .participant-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px 4px 4px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .participant-chip .chip-avatar {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: white;
+            overflow: hidden;
+            position: relative;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+        }
+
+        .participant-chip.ai .chip-avatar {
+            background: linear-gradient(135deg, var(--accent-pink), var(--accent-secondary));
+        }
+
+        .participant-chip .chip-avatar img {
+            width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;
+        }
+
+        /* Sender name above group messages */
+        .message-sender {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 3px;
+            padding-left: 2px;
+        }
+
+        /* System / status line, centered */
+        .message.system {
+            align-self: center;
+            max-width: 90%;
+        }
+
+        .message.system .message-content {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 12px;
+            text-align: center;
+            font-style: italic;
+            padding: 4px 8px;
+        }
+
+        /* Share bar shown to the room creator */
+        .share-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            margin: 12px;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(236, 72, 153, 0.12));
+            border: 1px solid var(--border-hover);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+        }
+
+        .share-bar code {
+            font-family: 'Space Grotesk', monospace;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--accent-secondary);
+        }
+
+        .share-bar .btn-sm { margin-left: auto; flex-shrink: 0; }
+
+        /* Character multi-select checklist in the create-group modal */
+        .character-checklist {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            max-height: 260px;
+            overflow-y: auto;
+            padding: 4px;
+        }
+
+        .char-check {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .char-check:hover { border-color: var(--border-hover); }
+        .char-check.selected {
+            border-color: var(--accent-primary);
+            background: rgba(124, 58, 237, 0.12);
+        }
+
+        .char-check input { display: none; }
+
+        .char-check .cc-avatar {
+            width: 30px; height: 30px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 700; color: white; flex-shrink: 0;
+            overflow: hidden; position: relative;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+        }
+
+        .char-check .cc-avatar img {
+            width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;
+        }
+
+        .char-check .cc-name {
+            font-size: 12px; font-weight: 500;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
     </style>
 </head>
 <body>
@@ -1261,6 +1406,7 @@
             <header class="header">
                 <div class="logo">Chat Rooms</div>
                 <div class="header-actions">
+                    <button class="btn btn-secondary btn-sm" onclick="showCreateGroup()" aria-label="Create group room">👥 Group</button>
                     <div class="message-counter" id="messageCounter">
                         <span id="messagesUsed">0</span>/20
                     </div>
@@ -1313,6 +1459,91 @@
                     <button class="btn btn-primary send-btn" onclick="sendMessage()" aria-label="Send message">➤</button>
                 </div>
             </div>
+        </div>
+
+        <!-- Group Room Screen -->
+        <div class="chat-container" id="roomScreen">
+            <header class="chat-header">
+                <div class="chat-header-left">
+                    <button class="btn btn-secondary btn-back" onclick="leaveRoom()" aria-label="Leave room">←</button>
+                    <div class="chat-avatar" id="roomAvatar">👥</div>
+                    <div class="chat-info">
+                        <h3 id="roomName"></h3>
+                        <p id="roomSubtitle"></p>
+                    </div>
+                </div>
+                <div class="chat-controls">
+                    <button class="btn btn-secondary btn-icon" onclick="shareRoom()" aria-label="Share room">🔗</button>
+                </div>
+            </header>
+
+            <div class="participant-strip" id="participantStrip"></div>
+
+            <div class="chat-messages" id="roomMessages"></div>
+
+            <div class="chat-input-container">
+                <div class="chat-input-wrapper">
+                    <textarea class="chat-input" id="roomInput" placeholder="Ask the group something..." rows="1" aria-label="Room message input"></textarea>
+                    <button class="btn btn-secondary send-btn" onclick="continueDebate()" title="Let the AIs continue the debate" aria-label="Continue debate">🔄</button>
+                    <button class="btn btn-primary send-btn" onclick="sendRoomMessage()" aria-label="Send message">➤</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Group Modal -->
+    <div class="modal" id="createGroupModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Create Group Room</h2>
+                <button class="close-btn" onclick="closeModal('createGroupModal')" aria-label="Close">&times;</button>
+            </div>
+            <form onsubmit="createGroup(event)">
+                <div class="form-group">
+                    <label class="form-label">Room Name</label>
+                    <input type="text" class="form-input" id="groupRoomName" placeholder="e.g., Investing debate" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Your Display Name</label>
+                    <input type="text" class="form-input" id="groupDisplayName" placeholder="e.g., Olivier" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Pick AI Characters to debate (1–6)</label>
+                    <div class="character-checklist" id="groupCharacterChecklist"></div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('createGroupModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create &amp; Get Link</button>
+                </div>
+                <p style="text-align:center; margin-top:14px; font-size:13px; color:var(--text-secondary);">
+                    Have a code?
+                    <a href="#" onclick="closeModal('createGroupModal'); openJoinRoom(); return false;" style="color:var(--accent-secondary); font-weight:600;">Join an existing room</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Join Room Modal -->
+    <div class="modal" id="joinRoomModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Join Group Room</h2>
+                <button class="close-btn" onclick="closeModal('joinRoomModal')" aria-label="Close">&times;</button>
+            </div>
+            <form onsubmit="submitJoinRoom(event)">
+                <div class="form-group">
+                    <label class="form-label">Room Code</label>
+                    <input type="text" class="form-input" id="joinRoomCode" placeholder="e.g., AB12CD" required style="text-transform:uppercase;letter-spacing:2px;">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Your Display Name</label>
+                    <input type="text" class="form-input" id="joinDisplayName" placeholder="e.g., Max" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('joinRoomModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Join</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -1514,7 +1745,8 @@
             renderCharacters();
             setupEventListeners();
             updateMessageCounter();
-            
+            checkRoomLink();
+
             // Track page view
             Analytics.trackClick('Page Load', 'Page View');
         }
@@ -1563,6 +1795,21 @@
                 this.style.height = 'auto';
                 this.style.height = Math.min(this.scrollHeight, 100) + 'px';
             });
+
+            // Room input: Enter to send + auto-resize
+            const roomInput = document.getElementById('roomInput');
+            if (roomInput) {
+                roomInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendRoomMessage();
+                    }
+                });
+                roomInput.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+                });
+            }
 
             // Prevent zoom on iOS
             document.querySelectorAll('input, textarea, select').forEach(el => {
@@ -1820,7 +2067,9 @@
 
         async function callClaudeAPI(userMessage) {
            let systemPrompt = `You are ${currentCharacter.name}. ${currentCharacter.personality}
-Stay strictly in character at all times. Be engaging, detailed, creative, and adaptive to the user. Use natural, varied language. Never break character or say you're an AI unless asked directly.`;
+Stay strictly in character at all times. Be engaging, creative, and adaptive to the user. Use natural, varied language. Never break character or say you're an AI unless asked directly.
+
+IMPORTANT: Keep your replies short and conversational — usually 2 to 4 sentences, like a real text chat. Greetings and openers should be just a line or two. Do not send long monologues or walls of text. Only go longer when the user explicitly asks you to explain in depth.`;
 
     if (memoryContext) {
         systemPrompt += `\n\nPrevious conversation context and key facts about the user: ${memoryContext}. Reference these naturally when relevant.`;
@@ -1849,7 +2098,7 @@ Stay strictly in character at all times. Be engaging, detailed, creative, and ad
             },
             body: JSON.stringify({
                 messages: messages,
-                max_tokens: 800,
+                max_tokens: 300,
                 temperature: 0.9,
                 // Optional: character_id oder session_id mitschicken, falls du später Rate-Limiting pro User machen willst
                 // character_id: currentCharacter.id
@@ -2139,6 +2388,404 @@ Stay strictly in character at all times. Be engaging, detailed, creative, and ad
                 });
             }
         });
+
+        // ─────────────────────────────────────────────
+        // Group Rooms (issues #1 + #3)
+        // ─────────────────────────────────────────────
+        const API_ROOM = 'room.php';
+        let roomState = null;       // { code, participantId, displayName, name, lastSeq, messages, participants, aiRunning }
+        let roomPollTimer = null;
+        let roomSending = false;
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function roomStorageKey(code) { return `room_member_${code}`; }
+
+        function saveRoomMembership(code, participantId, displayName) {
+            localStorage.setItem(roomStorageKey(code), JSON.stringify({ participantId, displayName }));
+        }
+
+        function loadRoomMembership(code) {
+            const raw = localStorage.getItem(roomStorageKey(code));
+            try { return raw ? JSON.parse(raw) : null; } catch (e) { return null; }
+        }
+
+        function buildRoomLink(code) {
+            const url = new URL(window.location);
+            url.searchParams.set('room', code);
+            return url.toString();
+        }
+
+        // ── Create ──
+        function showCreateGroup() {
+            Analytics.trackClick('Create Group Modal', 'Groups');
+            renderGroupChecklist();
+            document.getElementById('groupDisplayName').value = localStorage.getItem('lastDisplayName') || '';
+            document.getElementById('groupRoomName').value = '';
+            showModal('createGroupModal');
+        }
+
+        function renderGroupChecklist() {
+            const list = document.getElementById('groupCharacterChecklist');
+            const all = [...PREDEFINED_CHARACTERS, ...customCharacters];
+            list.innerHTML = all.map(char => {
+                const avatar = char.image
+                    ? `<img src="${char.image}" alt="" onerror="this.style.display='none'; this.parentElement.textContent='${getInitials(char.name)}';">`
+                    : escapeHtml(getInitials(char.name));
+                return `
+                    <label class="char-check" data-id="${escapeHtml(char.id)}">
+                        <input type="checkbox" value="${escapeHtml(char.id)}" onchange="this.closest('.char-check').classList.toggle('selected', this.checked)">
+                        <span class="cc-avatar">${avatar}</span>
+                        <span class="cc-name">${escapeHtml(char.name)}</span>
+                    </label>
+                `;
+            }).join('');
+        }
+
+        async function createGroup(event) {
+            event.preventDefault();
+            const roomName = document.getElementById('groupRoomName').value.trim();
+            const displayName = document.getElementById('groupDisplayName').value.trim();
+            const checked = [...document.querySelectorAll('#groupCharacterChecklist input:checked')].map(i => i.value);
+
+            if (!displayName) return;
+            if (checked.length < 1) { alert('Pick at least one AI character.'); return; }
+            if (checked.length > 6) { alert('Pick at most 6 characters.'); return; }
+
+            const all = [...PREDEFINED_CHARACTERS, ...customCharacters];
+            const ais = checked.map(id => {
+                const c = all.find(x => x.id === id);
+                return { id: c.id, name: c.name, personality: c.personality, image: c.image || null };
+            });
+
+            localStorage.setItem('lastDisplayName', displayName);
+            Analytics.trackClick('Create Group Submit', 'Groups');
+
+            try {
+                const res = await fetch(API_ROOM, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'create', roomName, displayName, ais })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Failed to create room');
+
+                closeModal('createGroupModal');
+                saveRoomMembership(data.code, data.participantId, displayName);
+                enterRoom(data.code, data.participantId, displayName, data.state, true);
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        }
+
+        // ── Join ──
+        function openJoinRoom(prefillCode = '') {
+            document.getElementById('joinRoomCode').value = prefillCode;
+            document.getElementById('joinDisplayName').value = localStorage.getItem('lastDisplayName') || '';
+            showModal('joinRoomModal');
+        }
+
+        async function submitJoinRoom(event) {
+            event.preventDefault();
+            const code = document.getElementById('joinRoomCode').value.trim().toUpperCase();
+            const displayName = document.getElementById('joinDisplayName').value.trim();
+            if (!code || !displayName) return;
+            await joinRoom(code, displayName);
+        }
+
+        async function joinRoom(code, displayName) {
+            localStorage.setItem('lastDisplayName', displayName);
+            try {
+                const res = await fetch(API_ROOM, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'join', code, displayName })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Failed to join room');
+                closeModal('joinRoomModal');
+                saveRoomMembership(code, data.participantId, displayName);
+                enterRoom(code, data.participantId, displayName, data.state, false);
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        }
+
+        async function rejoinRoom(code, membership) {
+            try {
+                const res = await fetch(`${API_ROOM}?action=state&code=${encodeURIComponent(code)}&since=0`);
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Room not found');
+                enterRoom(code, membership.participantId, membership.displayName, data.state, false);
+            } catch (err) {
+                openJoinRoom(code); // membership stale or room gone → ask to (re)join
+            }
+        }
+
+        function checkRoomLink() {
+            const code = new URLSearchParams(window.location.search).get('room');
+            if (!code) return;
+            const upper = code.toUpperCase();
+            const membership = loadRoomMembership(upper);
+            if (membership && membership.participantId) {
+                rejoinRoom(upper, membership);
+            } else {
+                openJoinRoom(upper);
+            }
+        }
+
+        // ── Enter / render / poll ──
+        function enterRoom(code, participantId, displayName, state, showShare) {
+            stopRoomPolling();
+            roomState = { code, participantId, displayName, name: state.name, lastSeq: 0, messages: [], participants: [] };
+
+            document.getElementById('homeScreen').style.display = 'none';
+            document.getElementById('chatScreen').classList.remove('active');
+            document.getElementById('roomScreen').classList.add('active');
+
+            const existingShare = document.getElementById('roomShareBar');
+            if (existingShare) existingShare.remove();
+
+            applyState(state, true);
+            if (showShare) showShareBar();
+
+            try {
+                const url = new URL(window.location);
+                url.searchParams.set('room', code);
+                window.history.replaceState({}, '', url);
+            } catch (e) {}
+
+            document.getElementById('roomInput').focus();
+            startRoomPolling();
+        }
+
+        function applyState(state, replace) {
+            if (!roomState) return;
+            roomState.participants = state.participants;
+
+            if (replace) {
+                roomState.messages = state.messages.slice();
+            } else {
+                roomState.messages = roomState.messages.filter(m => !m.optimistic);
+                for (const m of state.messages) {
+                    if (m.seq > roomState.lastSeq) roomState.messages.push(m);
+                }
+            }
+            if (state.seq > roomState.lastSeq) roomState.lastSeq = state.seq;
+            roomState.aiRunning = state.aiRunning;
+            roomState.name = state.name;
+
+            document.getElementById('roomName').textContent = state.name;
+            document.getElementById('roomSubtitle').textContent =
+                state.participants.length + (state.participants.length === 1 ? ' participant' : ' participants');
+            renderParticipants(state.participants);
+            renderRoomMessages();
+            updateRoomTyping(state.aiRunning);
+        }
+
+        function renderParticipants(participants) {
+            const strip = document.getElementById('participantStrip');
+            strip.innerHTML = participants.map(p => {
+                const isAi = p.type === 'ai';
+                const avatar = p.image
+                    ? `<img src="${p.image}" alt="" onerror="this.style.display='none'; this.parentElement.textContent='${getInitials(p.name)}';">`
+                    : escapeHtml(getInitials(p.name));
+                const you = p.id === roomState.participantId ? ' (you)' : '';
+                return `<span class="participant-chip ${isAi ? 'ai' : ''}">
+                    <span class="chip-avatar">${avatar}</span>${escapeHtml(p.name)}${you}
+                </span>`;
+            }).join('');
+        }
+
+        function renderRoomMessages() {
+            const container = document.getElementById('roomMessages');
+            const partById = {};
+            (roomState.participants || []).forEach(p => { partById[p.id] = p; });
+
+            container.innerHTML = roomState.messages.map(m => {
+                if (m.senderType === 'system') {
+                    return `<div class="message system"><div class="message-content">${escapeHtml(m.content)}</div></div>`;
+                }
+                const isMe = m.senderId === roomState.participantId;
+                const p = partById[m.senderId];
+                const avatar = (p && p.image)
+                    ? `<img src="${p.image}" alt="${escapeHtml(m.senderName)}" onerror="this.style.display='none'; this.parentElement.textContent='${getInitials(m.senderName)}';">`
+                    : escapeHtml(getInitials(m.senderName));
+                const nameLabel = isMe ? '' : `<div class="message-sender">${escapeHtml(m.senderName)}</div>`;
+                return `
+                    <div class="message ${isMe ? 'user' : 'assistant'}">
+                        <div class="message-avatar">${avatar}</div>
+                        <div>
+                            ${nameLabel}
+                            <div class="message-content">${escapeHtml(m.content)}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            requestAnimationFrame(() => { container.scrollTop = container.scrollHeight; });
+        }
+
+        function updateRoomTyping(aiRunning) {
+            const container = document.getElementById('roomMessages');
+            let typing = document.getElementById('roomTyping');
+            if (aiRunning) {
+                if (!typing) {
+                    typing = document.createElement('div');
+                    typing.id = 'roomTyping';
+                    typing.className = 'typing-indicator';
+                    typing.innerHTML = '<div class="typing-dots"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+                    container.appendChild(typing);
+                    container.scrollTop = container.scrollHeight;
+                }
+            } else if (typing) {
+                typing.remove();
+            }
+        }
+
+        function startRoomPolling() {
+            stopRoomPolling();
+            roomPollTimer = setInterval(pollRoom, 2000);
+        }
+
+        function stopRoomPolling() {
+            if (roomPollTimer) { clearInterval(roomPollTimer); roomPollTimer = null; }
+        }
+
+        async function pollRoom() {
+            if (!roomState) return;
+            try {
+                const res = await fetch(`${API_ROOM}?action=state&code=${encodeURIComponent(roomState.code)}&since=${roomState.lastSeq}`);
+                if (!res.ok) return; // transient error, retry next tick
+                const data = await res.json();
+                applyState(data.state, false);
+            } catch (e) { /* ignore transient poll errors */ }
+        }
+
+        // ── Send / continue / leave / share ──
+        async function sendRoomMessage() {
+            if (!roomState || roomSending) return;
+            const input = document.getElementById('roomInput');
+            const content = input.value.trim();
+            if (!content) return;
+
+            roomSending = true;
+            input.value = '';
+            input.style.height = 'auto';
+
+            // Optimistic echo of my own message.
+            roomState.messages.push({
+                optimistic: true,
+                seq: roomState.lastSeq + 0.5,
+                senderId: roomState.participantId,
+                senderName: roomState.displayName,
+                senderType: 'human',
+                content: content
+            });
+            renderRoomMessages();
+            updateRoomTyping(true);
+
+            try {
+                const res = await fetch(API_ROOM, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'post', code: roomState.code, participantId: roomState.participantId, content })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Failed to send');
+                applyState(data.state, true); // authoritative full state clears the optimistic echo
+            } catch (err) {
+                roomState.messages = roomState.messages.filter(m => !m.optimistic);
+                renderRoomMessages();
+                updateRoomTyping(false);
+                alert('Error: ' + err.message);
+            } finally {
+                roomSending = false;
+            }
+        }
+
+        async function continueDebate() {
+            if (!roomState || roomSending) return;
+            Analytics.trackClick('Continue Debate', 'Groups');
+            roomSending = true;
+            updateRoomTyping(true);
+            try {
+                const res = await fetch(API_ROOM, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'continue', code: roomState.code })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Failed');
+                applyState(data.state, true);
+            } catch (err) {
+                updateRoomTyping(false);
+                alert('Error: ' + err.message);
+            } finally {
+                roomSending = false;
+            }
+        }
+
+        function leaveRoom() {
+            Analytics.trackClick('Leave Room', 'Groups');
+            stopRoomPolling();
+            roomState = null;
+            document.getElementById('roomScreen').classList.remove('active');
+            document.getElementById('homeScreen').style.display = 'block';
+            document.getElementById('roomMessages').innerHTML = '';
+            document.getElementById('participantStrip').innerHTML = '';
+            const shareBar = document.getElementById('roomShareBar');
+            if (shareBar) shareBar.remove();
+            try {
+                const url = new URL(window.location);
+                url.searchParams.delete('room');
+                window.history.replaceState({}, '', url);
+            } catch (e) {}
+        }
+
+        function showShareBar() {
+            if (document.getElementById('roomShareBar')) return;
+            const container = document.getElementById('roomMessages');
+            const bar = document.createElement('div');
+            bar.className = 'share-bar';
+            bar.id = 'roomShareBar';
+            bar.innerHTML = `<span>Invite people with code <code>${escapeHtml(roomState.code)}</code></span>
+                <button class="btn btn-primary btn-sm" onclick="copyRoomLink(event)">Copy link</button>`;
+            container.parentNode.insertBefore(bar, container);
+        }
+
+        function copyRoomLink(ev) {
+            const btn = ev && ev.currentTarget;
+            const link = buildRoomLink(roomState.code);
+            const done = () => { if (btn) { btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy link', 1500); } };
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(link).then(done, () => prompt('Copy this link:', link));
+            } else {
+                prompt('Copy this link:', link);
+            }
+        }
+
+        function shareRoom() {
+            if (!roomState) return;
+            const link = buildRoomLink(roomState.code);
+            if (navigator.share) {
+                navigator.share({ title: roomState.name, text: 'Join my group room on Wyssey', url: link }).catch(() => {});
+            } else if (navigator.clipboard) {
+                navigator.clipboard.writeText(link).then(
+                    () => alert('Room link copied:\n' + link),
+                    () => prompt('Copy this link:', link)
+                );
+            } else {
+                prompt('Copy this link:', link);
+            }
+        }
 
         // Initialize
         init();
